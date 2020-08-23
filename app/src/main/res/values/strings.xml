@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">MeetupScanApp</string>
+    <string name="success">Сканирование прошло успешно!</string>
+    <string name="stub">Отсканируйте QR код</string>
+</resources>
