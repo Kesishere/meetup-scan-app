@@ -12,9 +12,9 @@
 
     <RelativeLayout
         android:id="@+id/rl_text"
-        android:layout_below="@id/code_scanner"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_below="@id/code_scanner">
 
         <ImageView
             android:id="@+id/result_icon"
@@ -22,7 +22,7 @@
             android:layout_height="100dp"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="100dp"
-            android:src="@drawable/ic_qr_code"/>
+            android:src="@drawable/ic_qr_code" />
 
         <TextView
             android:id="@+id/result_text"
@@ -35,6 +35,17 @@
 
             android:textSize="24sp"
             android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/print"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:text="Печать"
+            android:visibility="gone"
+            android:layout_marginBottom="20dp"/>
+
 
     </RelativeLayout>
 
