@@ -99,15 +99,15 @@ class CardPrintAdapter(private val context: Context, private val user: UserModel
         page.canvas.apply {
 
             // units are in points (1/72 of an inch)
-            val titleBaseLine = 72f
-            val leftMargin = 54f
+            val titleBaseLine = 150f
+            val leftMargin = 26f
 
             val paint = Paint()
             paint.color = Color.BLACK
-            paint.textSize = 36f
-            drawText("${user?.user?.surname +  user?.user?.name}", leftMargin, titleBaseLine, paint)
+            paint.textSize = 20f
+            drawText("${user?.user?.surname} ${user?.user?.name}", leftMargin, titleBaseLine, paint)
 
-            paint.textSize = 11f
+            paint.textSize = 16f
             drawText("${user?.user?.company}", leftMargin, titleBaseLine + 25, paint)
 
         }

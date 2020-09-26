@@ -1,13 +1,10 @@
 package com.kes.meetupscanapp
 
 import android.Manifest
-import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.print.PrintAttributes
-import android.print.PrintManager
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -38,6 +35,24 @@ class MainActivity : AppCompatActivity(), DecodeCallback, CoroutineScope {
     }
 
 
+    override fun onResume() {
+        super.onResume()
+        if (mPermissionGranted) {
+            codeScanner.startPreview()
+        }
+
+        if (binding != null) {
+            binding.resultIcon.setImageDrawable(
+                ContextCompat.getDrawable(
+                    this@MainActivity,
+                    R.drawable.ic_qr_code
+                )
+            )
+            binding.resultText.text = getString(R.string.stub)
+        }
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -58,9 +73,6 @@ class MainActivity : AppCompatActivity(), DecodeCallback, CoroutineScope {
 
         requestCameraPermission()
 
-        binding.print.setOnClickListener {
-            startPrint()
-        }
 
 //        val client = OkHttpClient()
 //
@@ -74,15 +86,6 @@ class MainActivity : AppCompatActivity(), DecodeCallback, CoroutineScope {
 //        launch(Dispatchers.IO) { client.newCall(request).execute().use { response ->  Timber.d(response.body.toString()) }  }
 
 
-    }
-
-    private fun startPrint() {
-        this.also { context ->
-            val printManager = context.getSystemService(Context.PRINT_SERVICE) as PrintManager
-            val jobName = "${context.getString(R.string.app_name)} Document"
-            val printAttributes = PrintAttributes.Builder().setMediaSize(PrintAttributes.MediaSize.ISO_A5).build()
-            printManager.print(jobName, CardPrintAdapter(context, user), printAttributes)
-        }
     }
 
     private fun requestCameraPermission() {
@@ -131,23 +134,48 @@ class MainActivity : AppCompatActivity(), DecodeCallback, CoroutineScope {
 
                 val data = dataRequest.await()
 
-                user = Gson().fromJson(data, UserModel::class.java)
-                withContext(Dispatchers.Main){ binding.print.visibility = View.VISIBLE}
+
+                if (data != null) {
+                    user = Gson().fromJson(data, UserModel::class.java)
+
+                    Timber.d(user.toString())
+                    if (user!!.lastCheck != null) {
+                        showAlert(user!!.lastCheck?.timestamp)
+                    } else showSuccess(user)
+
+                } else showError()
 
 
             } else {
                 Timber.w("Unable to get text result: %s", decodeResult.toString())
             }
 
-            if (!codeScanner.isPreviewActive) {
-                codeScanner.startPreview()
-            }
+
         }
     }
 
-    fun showSuccess() {
-        binding.resultIcon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_check))
-        binding.resultText.text = getString(R.string.success)
+    private fun showSuccess(user: UserModel?) {
+        launch(Dispatchers.Main) {
+            binding.resultIcon.setImageDrawable(
+                ContextCompat.getDrawable(
+                    this@MainActivity,
+                    R.drawable.ic_check
+                )
+            )
+            binding.resultText.text = getString(R.string.success)
+
+
+            delay(1000 /* Нужно выбрать */)
+
+            val intent = Intent(this@MainActivity, UserActivity::class.java)
+            intent.putExtra("user", user)
+            startActivity(intent)
+        }
+    }
+
+    private fun showError() {
+        binding.resultIcon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_error))
+        binding.resultText.text = "Ошибка сканирования!" //@TODO какие ошибки могут быть
 
         launch {
             delay(2000 /* Нужно выбрать */)
@@ -163,12 +191,14 @@ class MainActivity : AppCompatActivity(), DecodeCallback, CoroutineScope {
         }
     }
 
-    fun showError() {
-        binding.resultIcon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_error))
-        binding.resultText.text = "Ошибка сканирования!" //@TODO какие ошибки могут быть
+
+    private fun showAlert(date: String?) {
+        binding.resultIcon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_report))
+        binding.resultText.text =
+            "Билет уже был отксканирован\n" + "${date}"//@TODO какие ошибки могут быть
 
         launch {
-            delay(2000 /* Нужно выбрать */)
+            delay(3000 /* Нужно выбрать */)
 
             binding.resultIcon.setImageDrawable(
                 ContextCompat.getDrawable(

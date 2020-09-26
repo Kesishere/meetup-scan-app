@@ -13,4 +13,9 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="CustomDialogTheme" parent="android:Theme.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+
+    </style>
+
 </resources>
